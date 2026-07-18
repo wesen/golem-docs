@@ -38,23 +38,25 @@ logcopter-generate:
 	GOWORK=off go generate ./...
 
 logcopter-check:
-	GOWORK=off go tool logcopter-gen -area-prefix go-go-golems.XXX -strip-prefix github.com/go-go-golems/XXX -check ./pkg/...
+	GOWORK=off go tool logcopter-gen -area-prefix go-go-golems.golem-docs -strip-prefix github.com/go-go-golems/golem-docs -check ./pkg/...
 
 goreleaser:
 	GOWORK=off goreleaser release $(GORELEASER_ARGS) $(GORELEASER_TARGET)
 
+# Validate the svu output before tagging: a bare `git tag` (empty argument)
+# would just list tags and exit 0, silently skipping the release tag.
 tag-major:
-	git tag $(shell svu major)
+	@tag="$$(svu major)" && test -n "$$tag" && git tag "$$tag" && echo "Tagged $$tag"
 
 tag-minor:
-	git tag $(shell svu minor)
+	@tag="$$(svu minor)" && test -n "$$tag" && git tag "$$tag" && echo "Tagged $$tag"
 
 tag-patch:
-	git tag $(shell svu patch)
+	@tag="$$(svu patch)" && test -n "$$tag" && git tag "$$tag" && echo "Tagged $$tag"
 
 release:
 	git push origin --tags
-	GOWORK=off GOPROXY=proxy.golang.org go list -m github.com/go-go-golems/XXX@$(shell svu current)
+	GOWORK=off GOPROXY=proxy.golang.org go list -m github.com/go-go-golems/golem-docs@$(shell svu current)
 
 bump-go-go-golems:
 	@deps="$$(awk '/^require[[:space:]]+github\.com\/go-go-golems\// { print $$2 } /^[[:space:]]*github\.com\/go-go-golems\// { print $$1 }' go.mod | sort -u)"; \
@@ -63,11 +65,11 @@ bump-go-go-golems:
 	else \
 		echo "Bumping go-go-golems dependencies:"; \
 		echo "$$deps"; \
-		for dep in $$deps; do GOWORK=off go get "$${dep}@latest"; done; \
+		for dep in $$deps; do GOWORK=off go get "$${dep}@latest" || exit 1; done; \
 	fi
 	GOWORK=off go mod tidy
 
-XXX_BINARY=$(shell which XXX)
+GOLEM_DOCS_BINARY=$(shell which golem-docs)
 install:
-	GOWORK=off go build -o ./dist/XXX ./cmd/XXX && \
-		cp ./dist/XXX $(XXX_BINARY)
+	GOWORK=off go build -o ./dist/golem-docs ./cmd/golem-docs && \
+		cp ./dist/golem-docs $(GOLEM_DOCS_BINARY)

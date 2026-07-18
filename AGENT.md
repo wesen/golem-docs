@@ -2,7 +2,7 @@
 
 ## Build Commands
 
-- Run a binary in XXX/YYY/FOOO: `go run ./XXX/YYY/FOOO` . Use this instead of build + ./XXX.
+- Run a binary in cmd/golem-docs: `go run ./cmd/golem-docs` . Use this instead of build + ./golem-docs.
 - Build: `go build ./...`
 - Test: `go test ./...`
 - Run single test: `go test ./pkg/path/to/package -run TestName`
